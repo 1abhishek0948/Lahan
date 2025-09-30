@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Group Chat</title>
+  <!-- Bootstrap CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f0f2f5;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .chat-container {
+      width: 100%;
+      height: 100%;
+      max-width: 1200px;
+      max-height: 90vh;
+      display: flex;
+      background: #ffffff;
+      border-radius: 1rem;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      border: 1px solid #e0e0e0;
+    }
+    #groups-sidebar {
+      flex: 0 0 280px;
+      background-color: #f7f9fa;
+      border-right: 1px solid #e0e0e0;
+      padding: 1.5rem 0;
+      display: flex;
+      flex-direction: column;
+    }
+    #groups-sidebar h5 { padding: 0 1.5rem; font-weight: 700; color: #333; }
+    #user-info { padding: 1rem 1.5rem; font-size: 0.8rem; color: #6c757d; word-wrap: break-word; }
+    #user-info .badge { font-size: 0.75rem; }
+    .list-group-item {
+      cursor: pointer; border: none; padding: 1rem 1.5rem; font-weight: 500; color: #555;
+      transition: all 0.2s ease-in-out; border-left: 3px solid transparent;
+    }
+    .list-group-item:hover { background-color: #e9ecef; }
+    .list-group-item.active {
+      background-color: #e9f5ff; color: #007bff; font-weight: 700; border-left: 3px solid #007bff;
+    }
+    .chat-area { flex-grow: 1; display: flex; flex-direction: column; }
+    .chat-header { padding: 1rem 1.5rem; border-bottom: 1px solid #e0e0e0; background: #fff; }
+    .chat-header h5 { margin: 0; font-weight: 600; }
+    #messages-container {
+      flex-grow: 1; padding: 1.5rem; overflow-y: auto; display: flex; flex-direction: column;
+    }
+    .message { display: flex; margin-bottom: 1rem; max-width: 75%; }
+    .message-bubble { padding: 0.75rem 1rem; border-radius: 1.25rem; position: relative; }
+    .message-sender { font-weight: 600; font-size: 0.8rem; margin-bottom: 0.25rem; color: #495057; }
+    .message-text { word-wrap: break-word; }
+    .message-time { font-size: 0.7rem; color: #6c757d; margin-top: 0.25rem; }
+    .message.current-user { align-self: flex-end; flex-direction: row-reverse; }
+    .message.current-user .message-bubble {
+      background-color: #007bff; color: white; border-bottom-right-radius: 0.5rem;
+    }
+    .message.current-user .message-sender,
+    .message.current-user .message-time { text-align: right; color: #f8f9fa; }
+    .message.other-user { align-self: flex-start; }
+    .message.other-user .message-bubble {
+      background-color: #e9ecef; color: #343a40; border-bottom-left-radius: 0.5rem;
+    }
+    #message-form-container { padding: 1.5rem; border-top: 1px solid #e0e0e0; background-color: #f7f9fa; }
+    #message-form { display: flex; }
+    #message-input { flex-grow: 1; border-radius: 2rem 0 0 2rem; border-right: none; box-shadow: none; }
+    #message-form button { border-radius: 0 2rem 2rem 0; }
+    @media (max-width: 768px) {
+      .chat-container { flex-direction: column; height: 100vh; max-height: 100vh; border-radius: 0; }
+      #groups-sidebar { flex: 0 0 auto; border-right: none; border-bottom: 1px solid #e0e0e0; padding: 1rem 0; }
+      #groups-sidebar .list-group { flex-direction: row; overflow-x: auto; white-space: nowrap; }
+      .list-group-item { border-left: none; border-bottom: 3px solid transparent; }
+      .list-group-item.active { border-left: none; border-bottom: 3px solid #007bff; }
+      #user-info { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="chat-container">
+    <!-- Sidebar -->
+    <aside id="groups-sidebar">
+      <div class="px-4">
+        <h5><i class="fas fa-users me-2"></i>Groups</h5>
+      </div>
+      <div id="user-info">
+        Your User ID: <br><span id="user-id-display" class="badge bg-secondary">Loading...</span>
+      </div>
+      <div id="groups-list" class="list-group list-group-flush mt-3 flex-grow-1">
+        <div class="text-center p-3">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading groups...</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Chat -->
+    <main class="chat-area">
+      <header class="chat-header">
+        <h5 id="current-group-name">Select a group to start chatting</h5>
+      </header>
+      <div id="messages-container">
+        <div class="d-flex flex-column align-items-center justify-content-center h-100 text-muted">
+          <i class="fas fa-comments fa-3x mb-3"></i>
+          <p>Messages will appear here.</p>
+        </div>
+      </div>
+      <div id="message-form-container">
+        <form id="message-form">
+          <input type="text" id="message-input" class="form-control" placeholder="Type your message..." autocomplete="off" disabled>
+          <button type="submit" class="btn btn-primary" id="send-button" disabled>
+            <i class="fas fa-paper-plane"></i>
+          </button>
+        </form>
+      </div>
+    </main>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, collection, addDoc, query, onSnapshot, serverTimestamp, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    // DOM references
+    const groupsList = document.getElementById('groups-list');
+    const currentGroupName = document.getElementById('current-group-name');
+    const messagesContainer = document.getElementById('messages-container');
+    const messageForm = document.getElementById('message-form');
+    const messageInput = document.getElementById('message-input');
+    const sendButton = document.getElementById('send-button');
+    const userIdDisplay = document.getElementById('user-id-display');
+
+    // State
+    let db, auth, userId;
+    let activeGroup = null;
+    let unsubscribeFromMessages = null;
+    const PRE_BUILT_GROUPS = ['Lahan Mayor', 'Electrity Problem', 'Ward No 1-24 group dissuction', 'Event Planning'];
+
+    // Firebase Config
+    const firebaseConfig = {
+      apiKey: "AIzaSyCy0nR3sIBc2SLFoyY2QfK4y9p54XCszCo",
+      authDomain: "group-chat-ae5ea.firebaseapp.com",
+      projectId: "group-chat-ae5ea",
+      storageBucket: "group-chat-ae5ea.firebasestorage.app",
+      messagingSenderId: "667919164515",
+      appId: "1:667919164515:web:3db34551f700ffc7bc4456"
+    };
+
+    // Init Firebase
+    const app = initializeApp(firebaseConfig);
+    db = getFirestore(app);
+    auth = getAuth(app);
+
+    // Authentication
+    onAuthStateChanged(auth, user => {
+      if (user) {
+        userId = user.uid;
+        userIdDisplay.textContent = userId;
+        initializeAppUI();
+      } else {
+        authenticateUser();
+      }
+    });
+
+    async function authenticateUser() {
+      try {
+        await signInAnonymously(auth);
+      } catch (error) {
+        console.error("Authentication failed:", error);
+        showError("Could not authenticate. Chat is disabled.");
+      }
+    }
+
+    // UI
+    function initializeAppUI() {
+      renderGroups();
+      messageForm.addEventListener('submit', handleSendMessage);
+    }
+
+    function renderGroups() {
+      groupsList.innerHTML = '';
+      PRE_BUILT_GROUPS.forEach(groupName => {
+        const groupItem = document.createElement('a');
+        groupItem.className = 'list-group-item list-group-item-action';
+        groupItem.textContent = groupName;
+        groupItem.dataset.groupName = groupName;
+        groupItem.addEventListener('click', () => switchGroup(groupName));
+        groupsList.appendChild(groupItem);
+      });
+    }
+
+    function switchGroup(groupName) {
+      if (activeGroup === groupName) return;
+      activeGroup = groupName;
+
+      // Update UI
+      document.querySelectorAll('#groups-list .list-group-item').forEach(item => {
+        item.classList.toggle('active', item.dataset.groupName === groupName);
+      });
+      currentGroupName.textContent = groupName;
+      messageInput.disabled = false;
+      sendButton.disabled = false;
+      messageInput.placeholder = `Message #${groupName.split(' ')[0]}`;
+
+      // Unsubscribe previous listener
+      if (unsubscribeFromMessages) unsubscribeFromMessages();
+
+      // Listen for new messages
+      listenForMessages();
+    }
+
+    function listenForMessages() {
+      messagesContainer.innerHTML = '<div class="text-center p-5"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading messages...</span></div></div>';
+
+      const messagesCollectionPath = `groups/${activeGroup}/messages`;
+      const q = query(collection(db, messagesCollectionPath), orderBy("timestamp"));
+
+      unsubscribeFromMessages = onSnapshot(q, (querySnapshot) => {
+        messagesContainer.innerHTML = '';
+        if (querySnapshot.empty) {
+          messagesContainer.innerHTML = '<div class="d-flex flex-column align-items-center justify-content-center h-100 text-muted"><i class="fas fa-comment-slash fa-3x mb-3"></i><p>No messages yet. Be the first to say something!</p></div>';
+        } else {
+          querySnapshot.forEach(doc => renderMessage(doc.data()));
+          messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+      }, (error) => {
+        console.error("Error fetching messages: ", error);
+        showError("Failed to load messages for this group.");
+      });
+    }
+
+    function renderMessage(data) {
+      const messageDiv = document.createElement('div');
+      const isCurrentUser = data.senderId === userId;
+      messageDiv.className = `message ${isCurrentUser ? 'current-user' : 'other-user'}`;
+
+      const time = data.timestamp ? new Date(data.timestamp.seconds * 1000).toLocaleTimeString() : 'sending...';
+
+      messageDiv.innerHTML = `
+        <div class="message-bubble">
+          ${!isCurrentUser ? `<div class="message-sender">${data.senderId.substring(0, 8)}...</div>` : ''}
+          <div class="message-text">${sanitizeHTML(data.text)}</div>
+          <div class="message-time">${time}</div>
+        </div>
+      `;
+      messagesContainer.appendChild(messageDiv);
+    }
+
+    async function handleSendMessage(e) {
+      e.preventDefault();
+      const messageText = messageInput.value.trim();
+      if (messageText && activeGroup && userId) {
+        const messagesCollectionPath = `groups/${activeGroup}/messages`;
+        try {
+          await addDoc(collection(db, messagesCollectionPath), {
+            text: messageText,
+            senderId: userId,
+            timestamp: serverTimestamp()
+          });
+          messageInput.value = '';
+          messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        } catch (error) {
+          console.error("Error sending message: ", error);
+          showError("Message could not be sent.");
+        }
+      }
+    }
+
+    // Utils
+    function showError(message) {
+      messagesContainer.innerHTML = `<div class="alert alert-danger m-3">${message}</div>`;
+    }
+    function sanitizeHTML(str) {
+      const temp = document.createElement('div');
+      temp.textContent = str;
+      return temp.innerHTML;
+    }
+  </script>
+</body>
+</html>

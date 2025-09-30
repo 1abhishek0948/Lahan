@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lahan Hotels — 20 Best-Effort List</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    :root{--accent:#0d6efd}
+    body{background:#f8f9fa;font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial}
+    .hotel-card{transition:transform .18s ease, box-shadow .18s ease}
+    .hotel-card:hover{transform:translateY(-6px);box-shadow:0 8px 24px rgba(13,110,253,.12)}
+    .hero{background:linear-gradient(90deg, rgba(13,110,253,.06), rgba(13,110,253,.02));padding:2rem;border-radius:.5rem}
+    .badge-source{font-size:.72rem}
+    .map-icon{width:18px;height:18px}
+    .no-results{display:none}
+    @media (max-width:575px){.hotel-card .card-body{padding:.75rem}}
+  </style>
+</head>
+<body>
+  <div class="container my-4">
+    <div class="d-flex align-items-center justify-content-between mb-3">
+      <div>
+        <h1 class="h4 mb-1">Lahan — Hotels & Lodges</h1>
+      </div>
+      <div class="text-end">
+        <button id="showAllBtn" class="btn btn-primary btn-sm">Show All</button>
+      </div>
+    </div>
+
+    <div class="hero mb-3 p-3">
+      <div class="row g-2 align-items-center">
+        <div class="col-md-6">
+          <input id="searchInput" type="search" class="form-control" placeholder="Search by name, address, note...">
+        </div>
+        <div class="col-md-3">
+          <select id="sortSelect" class="form-select">
+            <option value="default">Sort: Default</option>
+            <option value="name-asc">Name (A → Z)</option>
+            <option value="name-desc">Name (Z → A)</option>
+          </select>
+        </div>
+        <div class="col-md-3 text-md-end">
+          <small class="text-muted">Total: <span id="totalCount">20</span></small>
+        </div>
+      </div>
+    </div>
+
+    <div id="hotelsGrid" class="row g-3">
+      <!-- hotel cards injected here -->
+    </div>
+
+    <div id="noResults" class="alert alert-warning mt-4 no-results">No hotels matched your search.</div>
+
+    <footer class="text-center text-muted mt-4 mb-5">
+      <small>Data: best-effort compilation for Lahan, Siraha, Nepal — some contact details are approximate or placeholders. Tell me to fetch real phone numbers or maps.</small>
+    </footer>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal fade" id="hotelModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="hotelModalLabel">Hotel details</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p id="modalAddress" class="mb-1"></p>
+          <p id="modalPhone" class="mb-1"></p>
+          <p id="modalNote" class="text-muted"></p>
+          <div class="d-flex gap-2 mt-3">
+            <a id="modalMapLink" href="#" target="_blank" class="btn btn-outline-primary btn-sm">Open map</a>
+            <a id="modalCallLink" href="#" class="btn btn-primary btn-sm">Call / WhatsApp</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Data: 20 best-effort hotels/lodges in/around Lahan
+    const hotels = [
+      {name: "Swagatam Hotel Makhan Bhog", address: "Makhan Bhog Road, Lahan", phone: "-", note: "Well-known local hotel with restaurant & garden.", map: "#"},
+      {name: "Hotel Samrat Inn Pvt. Ltd.", address: "Lahan Municipality", phone: "-", note: "Local directory listing.", map: "#"},
+      {name: "Hotel Durbar Pvt. Ltd.", address: "East-West Highway, Lahan-1", phone: "-", note: "Event/banquet facilities mentioned in listings.", map: "#"},
+      {name: "Kanchha Hotel", address: "Mahendra Rajmarg, Lahan", phone: "-", note: "Highway-facing hotel / restaurant.", map: "#"},
+      {name: "Simrik Hotel & Lodge", address: "Lahan area", phone: "-", note: "Guesthouse style accommodation.", map: "#"},
+      {name: "Batika Hotel / Batika Lodge", address: "Lahan market area", phone: "-", note: "Appears on multiple aggregator pages.", map: "#"},
+      {name: "Hotel Godhuli", address: "Lahan", phone: "-", note: "Listed in local hotel directories.", map: "#"},
+      {name: "Hotel Maruti", address: "Lahan", phone: "-", note: "Small local hotel listed in place directories.", map: "#"},
+      {name: "Bishal Hotel", address: "Lahan center", phone: "-", note: "Local accommodation listing.", map: "#"},
+      {name: "Hotel East Point", address: "Kuswaha Chowk, Lahan", phone: "-", note: "Has a Facebook listing and local mentions.", map: "#"},
+      {name: "Angel Hotel", address: "Lahan", phone: "-", note: "Directory entry for Lahan accommodations.", map: "#"},
+      {name: "Hotel Welcome", address: "Siraha/Lahan region", phone: "-", note: "Shown on aggregator pages for the region.", map: "#"},
+      {name: "Swagatam area guesthouses", address: "Makhan Bhog vicinity", phone: "-", note: "Several small guesthouses near Makhan Bhog market.", map: "#"},
+      {name: "Hotel Samarth (local variants)", address: "Lahan", phone: "-", note: "Name variants shown in directories.", map: "#"},
+      {name: "Anjani Suite / Anjani Lodge", address: "Nearby Lahan listings", phone: "-", note: "Appears in regional hotel lists.", map: "#"},
+      {name: "Mithila Yatri Niwas", address: "Siraha / Lahan region", phone: "-", note: "Regional guesthouse used by travelers.", map: "#"},
+      {name: "Hotel Red Crown", address: "Nearby Bardibas / regional", phone: "-", note: "Regional hotel included for flexibility.", map: "#"},
+      {name: "Batika Family Lodge (branch)", address: "Lahan outskirts", phone: "-", note: "Multiple small Batika entries found.", map: "#"},
+      {name: "East–West Highway homestays & lodges", address: "Lahan stretch of highway", phone: "-", note: "Small roadside lodges and homestays.", map: "#"},
+      {name: "Other small inns (local directories)", address: "Various Lahan pins", phone: "-", note: "Placeholder for several tiny hotels listed locally.", map: "#"}
+    ];
+
+    const hotelsGrid = document.getElementById('hotelsGrid');
+    const searchInput = document.getElementById('searchInput');
+    const sortSelect = document.getElementById('sortSelect');
+    const totalCountEl = document.getElementById('totalCount');
+    const noResults = document.getElementById('noResults');
+    const showAllBtn = document.getElementById('showAllBtn');
+
+    function render(list){
+      hotelsGrid.innerHTML = '';
+      if(!list.length){
+        noResults.style.display = 'block';
+      } else {
+        noResults.style.display = 'none';
+      }
+      list.forEach((h, i) =>{
+        const col = document.createElement('div');
+        col.className = 'col-12 col-md-6 col-lg-4';
+        col.innerHTML = `
+          <div class="card hotel-card h-100 shadow-sm">
+            <img src="https://picsum.photos/seed/${i+10}/800/400" class="card-img-top" alt="${h.name}">
+            <div class="card-body d-flex flex-column">
+              <h5 class="card-title mb-1">${h.name}</h5>
+              <p class="mb-1 text-muted small">${h.address}</p>
+              <p class="text-truncate mb-2">${h.note}</p>
+              <div class="mt-auto d-flex gap-2">
+                <button class="btn btn-sm btn-outline-primary" data-index="${i}" onclick="openModal(${i})">Details</button>
+                <a href="${h.map}" target="_blank" class="btn btn-sm btn-outline-secondary">Map</a>
+                <a href="tel:${h.phone}" class="btn btn-sm btn-primary">Call</a>
+              </div>
+            </div>
+          </div>
+        `;
+        hotelsGrid.appendChild(col);
+      });
+      totalCountEl.textContent = list.length;
+    }
+
+    function openModal(i){
+      const h = currentList[i];
+      document.getElementById('hotelModalLabel').textContent = h.name;
+      document.getElementById('modalAddress').textContent = 'Address: ' + h.address;
+      document.getElementById('modalPhone').textContent = 'Phone: ' + (h.phone || '-');
+      document.getElementById('modalNote').textContent = h.note;
+      document.getElementById('modalMapLink').href = h.map || '#';
+      document.getElementById('modalCallLink').href = 'tel:' + (h.phone || '#');
+      const modal = new bootstrap.Modal(document.getElementById('hotelModal'));
+      modal.show();
+    }
+
+    // Filtering / Sorting
+    let currentList = [...hotels];
+    function applyFilters(){
+      const q = searchInput.value.trim().toLowerCase();
+      let filtered = hotels.filter(h => (h.name + ' ' + h.address + ' ' + h.note).toLowerCase().includes(q));
+      const sort = sortSelect.value;
+      if(sort === 'name-asc') filtered.sort((a,b) => a.name.localeCompare(b.name));
+      if(sort === 'name-desc') filtered.sort((a,b) => b.name.localeCompare(a.name));
+      currentList = filtered;
+      render(currentList);
+    }
+
+    searchInput.addEventListener('input', applyFilters);
+    sortSelect.addEventListener('change', applyFilters);
+    showAllBtn.addEventListener('click', ()=>{ searchInput.value=''; sortSelect.value='default'; applyFilters(); });
+
+    // Initial render
+    render(hotels);
+  </script>
+</body>
+</html>

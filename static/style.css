@@ -1,0 +1,341 @@
+
+:root {
+    /* Light Mode Colors */
+    --body-bg: #f8f9fa;
+    --text-color: #212529;
+    --navbar-bg: #343a40;
+    --navbar-text: rgb(255, 255, 255);
+    --info-box-bg: #014a9b;
+    --info-box-text: white;
+    --card-bg: #ffffff;
+    --card-text: #212529;
+    --secondary-text: #6c757d;
+    --primary-color: #0d6efd; /* Bootstrap primary blue */
+    --success-color: #198754; /* Bootstrap success green */
+    --warning-color: #ffc107; /* Bootstrap warning yellow */
+    --light-bg: #f8f9fa;
+}
+
+body.dark-mode {
+    /* Dark Mode Colors */
+    --body-bg: #1a202c;
+    --text-color: #e2e8f0;
+    --navbar-bg: #2d3748;
+    --navbar-text: rgba(255, 255, 255, 0.85);
+    --info-box-bg: #2a4365;
+    --info-box-text: #e2e8f0;
+    --card-bg: #2d3748;
+    --card-text: #e2e8f0;
+    --secondary-text: #a0aec0;
+    --primary-color: #4299e1; /* Lighter blue for dark mode */
+    --success-color: #48bb78; /* Lighter green for dark mode */
+    --warning-color: #f6ad55; /* Lighter yellow for dark mode */
+    --light-bg: #2d3748; /* Dark equivalent for light backgrounds */
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--body-bg);
+    color: var(--text-color);
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.navbar {
+    background-color: var(--navbar-bg) !important;
+    transition: background-color 0.3s ease;
+}
+.navbar .nav-link, .navbar .navbar-brand {
+    color: var(--navbar-text) !important;
+}
+.navbar-brand{
+    font-weight: bold;
+    font-size: 1.5rem;
+    font-color: white !important; /* Example yellow color */
+
+    
+}
+.navbar .nav-link {
+    transition: background-color 0.3s ease, color 0.3s ease;
+    border-radius: 0.25rem;
+}
+.navbar .nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #ffffff !important;
+}
+form .form-control {
+  border-radius: 50px; /* or 999px to ensure full pill shape */
+}
+
+form .btn {
+  border-radius: 50px;
+}
+
+.navbar-toggler i {
+  font-size: 22px; /* adjust size */
+  color: #ffc107; /* example yellow */
+}
+
+
+.info-box {
+    background-color: var(--info-box-bg);
+    color: var(--info-box-text);
+    padding: 30px;
+    border-radius: 10px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    display: flex; /* Changed to flexbox */
+    flex-direction: column; /* Stack children vertically */
+    justify-content: space-between; /* Space out content and buttons */
+    min-height: 450px; /* Ensure it's at least as tall as the carousel images on desktop */
+    height: 450px; /* Fixed height for perfect alignment on desktop */
+}
+.info-box h2 {
+    font-size: 1.8rem;
+    font-weight: bold;
+}
+
+.category-icon {
+    width: 70px;
+    height: 70px;
+    background-color: var(--card-bg);
+    border-radius: 50%;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s, background-color 0.3s ease;
+}
+.category-icon:hover {
+    transform: scale(1.1);
+}
+.category-icon img {
+    transition: filter 0.3s ease;
+    /* Ensure category icons fit within their circle */
+    width: 100%;
+    height: 100%;
+    object-fit: contain; /* Scales the image to fit the content box */
+}
+body.dark-mode .category-icon img {
+    filter: invert(1) brightness(1.5);
+}
+
+.card, .bg-light {
+    background-color: var(--card-bg) !important;
+    color: var(--card-text) !important;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.card .text-muted, p.text-muted {
+    color: var(--secondary-text) !important;
+}
+
+.bg-primary { background-color: var(--primary-color) !important; }
+.bg-success { background-color: var(--success-color) !important; }
+.btn-warning {
+    background-color: var(--warning-color) !important;
+    color: #212529 !important; /* Keep text dark for contrast */
+    border-color: var(--warning-color) !important;
+}
+body.dark-mode .btn-warning {
+    color: var(--text-color) !important;
+}
+
+/* Styles for card images to ensure consistent size */
+.card-img-top {
+    height: 180px; /* Fixed height for all card images */
+    object-fit: cover; /* Crop image to cover the area */
+    width: 100%; /* Ensure it takes full width of its container */
+}
+
+/* Styles for main carousel images */
+.carousel-inner img {
+    height: 450px; /* Fixed height for carousel images on desktop */
+    object-fit: cover; /* Ensure images cover the carousel area */
+}
+
+.rounded-lg { border-radius: 0.5rem !important; }
+.rounded-t-lg { border-top-left-radius: 0.5rem !important; border-top-right-radius: 0.5rem !important; }
+.shadow-lg { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important; }
+.rounded-full { border-radius: 9999px; }
+
+/* Responsive video container */
+.video-container {
+    position: relative;
+    width: 100%;
+    padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+    height: 0;
+    overflow: hidden;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    background-color: #000;
+}
+.video-container iframe,
+.video-container video { /* Apply to both iframe and video */
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+}
+
+/* Added hover effect for interactive elements */
+.interactive-hover {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.interactive-hover:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Custom styles for horizontal scrolling cards */
+.scrollable-row {
+    display: flex;
+    flex-wrap: nowrap; /* Prevent wrapping */
+    overflow-x: auto; /* Enable horizontal scrolling */
+    gap: 1rem; /* Space between cards */
+    padding-bottom: 1rem; /* Add padding for scrollbar visibility */
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+    scrollbar-width: thin; /* Firefox */
+    scrollbar-color: var(--primary-color) var(--light-bg); /* Firefox */
+    align-items: stretch; /* Ensure cards stretch to fill height */
+    /* Removed justify-content-center to ensure content starts from left */
+}
+
+/* Hide scrollbar for Webkit browsers (Chrome, Safari) */
+.scrollable-row::-webkit-scrollbar {
+    height: 8px; /* Height of the horizontal scrollbar */
+}
+.scrollable-row::-webkit-scrollbar-thumb {
+    background-color: var(--primary-color);
+    border-radius: 10px;
+}
+.scrollable-row::-webkit-scrollbar-track {
+    background-color: var(--light-bg);
+    border-radius: 10px;
+}
+
+.scrollable-row .col {
+    flex: 0 0 auto; /* Prevent columns from growing/shrinkin g */
+    /* Responsive width for cards within scrollable rows */
+    width: 100%; /* Default to 100% width on small screens for full visibility */
+    min-width: 280px; /* Minimum width for cards on small screens */
+}
+
+@media (min-width: 768px) { /* Medium screens (md) and up */
+    .scrollable-row .col {
+        width: calc((100% / 2) - 0.5rem); /* 2 cards per view + gap */
+    }
+}
+
+@media (min-width: 992px) { /* On large screens (lg) and up */
+    .scrollable-row .col {
+    width: calc(33.33% - 0.66rem); /* Approximately 3 cards per view, accounting for gap */
+    /* max-width removed to allow for dynamic sizing based on calc */
+    }
+}
+
+/* Styles for integrated weather and traffic divs */
+.weather-traffic-container {
+    flex-grow: 1; /* Allows it to take available space */
+    margin-top: 1rem; /* Space between description and weather/traffic */
+    background-color: rgba(255, 255, 255, 0.1); /* Slightly transparent white for weather/traffic area */
+    border-radius: 8px;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 150px; /* Ensure a minimum height */
+}
+body.dark-mode .weather-traffic-container {
+    background-color: rgba(0, 0, 0, 0.2); /* Slightly transparent dark for dark mode */
+}
+
+.weather-forecast-grid {
+    display: flex; /* Changed to flex for horizontal scrolling */
+    flex-wrap: nowrap; /* Prevent wrapping */
+    overflow-x: auto; /* Enable horizontal scrolling */
+    gap: 10px; /* Gap between forecast cards */
+    margin-top: 20px;
+    width: 100%; /* Ensure grid takes full width */
+    padding-bottom: 10px; /* Space for scrollbar */
+    scrollbar-width: thin; /* Firefox */
+    scrollbar-color: rgba(255, 255, 255, 0.3) rgba(0, 0, 0, 0.1); /* Firefox */
+}
+/* Webkit scrollbar styles */
+.weather-forecast-grid::-webkit-scrollbar {
+    height: 6px;
+}
+.weather-forecast-grid::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.3);
+    border-radius: 10px;
+}
+.weather-forecast-grid::-webkit-scrollbar-track {
+    background-color: rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+}
+
+
+.weather-day-card {
+    background: var(--card-bg); /* Use card background for forecast days */
+    color: var(--card-text);
+    padding: 8px; /* Slightly less padding */
+    border-radius: 8px;
+    text-align: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    transition: background-color 0.3s ease, color 0.3s ease, transform 0.2s;
+    flex: 0 0 auto; /* Prevent cards from shrinking */
+    width: 100px; /* Fixed width for each forecast card */
+}
+.weather-day-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+.weather-day-card h5 {
+    font-size: 0.9rem; /* Smaller font size */
+    margin-bottom: 0.1rem;
+    font-weight: bold;
+}
+.weather-day-card p {
+    font-size: 0.75rem; /* Smaller font size */
+    margin-bottom: 0;
+    color: var(--secondary-text);
+}
+.weather-icon {
+    width: 30px; /* Smaller icon */
+    height: 30px;
+    margin-bottom: 3px;
+}
+
+/* Hide elements based on display mode */
+.hidden {
+    display: none !important;
+}
+
+/* Responsive adjustments for mobile view */
+@media (max-width: 767.98px) { /* For screens smaller than 768px (Bootstrap's md breakpoint) */
+    .carousel-inner img {
+        height: 250px !important; /* Smaller height for mobile carousel images */
+    }
+    .info-box {
+        min-height: 250px; /* Match the new carousel height on mobile */
+        height: auto; /* Allow height to adjust based on content */
+    }
+    .weather-traffic-container {
+        padding: 0.75rem;
+    }
+    .weather-day-card {
+        width: 90px; /* Slightly smaller width for mobile forecast cards */
+        padding: 5px;
+    }
+    .weather-day-card h5 {
+        font-size: 0.8rem;
+    }
+    .weather-day-card p {
+        font-size: 0.7rem;
+    }
+    .weather-icon {
+        width: 25px;
+        height: 25px;
+    }
+}
