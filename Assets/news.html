@@ -1,0 +1,351 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Lahan — Local News</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    :root{ --accent: #0d6efd; --muted:#6c757d; }
+    body{ background:#f6f8fb; font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; }
+    .hero{ background: linear-gradient(90deg, rgba(13,110,253,.06), rgba(13,110,253,.02)); padding:1.2rem; border-radius:.6rem; }
+    .news-card{ transition: transform .18s ease, box-shadow .18s ease; cursor:default; }
+    .news-card:hover{ transform: translateY(-6px); box-shadow: 0 12px 30px rgba(13,110,253,.06); }
+    .tag { font-size: .75rem; padding: .18rem .5rem; border-radius: .35rem; }
+    .source { font-size: .78rem; color: var(--muted); }
+    .truncate-3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+    .meta { font-size: .82rem; color: var(--muted); }
+    .no-results { display:none; }
+    @media (max-width:575px){ .hero{padding:.8rem} }
+  </style>
+</head>
+<body>
+  <div class="container my-4">
+    <!-- Header -->
+    <div class="d-flex align-items-center justify-content-between mb-3">
+      <div>
+        <h1 class="h4 mb-0">Lahan — Local News</h1>
+        <small class="text-muted">Latest hyperlocal updates from Lahan & Siraha region</small>
+      </div>
+      <div>
+        <button id="refreshBtn" class="btn btn-sm btn-outline-secondary">Refresh</button>
+      </div>
+    </div>
+
+    <!-- Controls -->
+    <div class="hero mb-3">
+      <div class="row g-2 align-items-center">
+        <div class="col-md-5">
+          <input id="searchInput" class="form-control" placeholder="Search news by title, tag, or content..." />
+        </div>
+        <div class="col-md-3">
+          <select id="filterSelect" class="form-select">
+            <option value="all">All categories</option>
+            <option value="civic">Civic / Municipal</option>
+            <option value="crime">Crime & Safety</option>
+            <option value="infrastructure">Infrastructure</option>
+            <option value="health">Health</option>
+            <option value="social">Social / Community</option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <select id="sortSelect" class="form-select">
+            <option value="recent">Sort: Most recent</option>
+            <option value="title-asc">Title A → Z</option>
+            <option value="title-desc">Title Z → A</option>
+          </select>
+        </div>
+        <div class="col-md-2 text-md-end">
+          <small class="text-muted">Showing <span id="shownCount">10</span></small>
+        </div>
+      </div>
+    </div>
+
+    <!-- Grid -->
+    <div id="newsGrid" class="row g-3"></div>
+
+    <div id="noResults" class="alert alert-warning mt-3 no-results">No news matched your search.</div>
+
+    <!-- Pagination -->
+    <nav class="d-flex justify-content-center mt-4" aria-label="News pagination">
+      <ul id="pager" class="pagination pagination-sm"></ul>
+    </nav>
+
+    <footer class="text-center text-muted mt-4 mb-5">
+      <small>Data is a best-effort hyperlocal compilation. For full sources check municipality notices, local media & FB pages.</small>
+    </footer>
+  </div>
+
+  <!-- Modal: News details -->
+  <div class="modal fade" id="newsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 id="modalTitle" class="modal-title"></h5>
+          <button class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p class="meta mb-1"><span id="modalDate"></span> · <span id="modalCategory" class="badge bg-light text-dark"></span> · <span id="modalSource" class="source"></span></p>
+          <hr/>
+          <p id="modalContent"></p>
+          <div id="modalLinks" class="mt-3"></div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    // --------- NEWS DATA (10 items) ----------
+    // Replace or extend these objects with real links / timestamps as needed.
+    const NEWS = [
+      {
+        id: 1,
+        title: "Municipality offers relief to family of protest victim",
+        category: "social",
+        tag: "aid",
+        date: "2025-09-19",
+        source: "Radio Nepal / Municipality",
+        excerpt: "Lahan municipality announced a relief package of Rs 100,000 to the family of Bijay Chaudhary, who lost his life during Gen-Z protests. Additional support: free education up to Grade 12 for the daughter and a municipal job for the wife (subject to qualification).",
+        links: [{label:"Read more", url:"https://radionepalonline.com/en/2025/09/19/416887.html"}]
+      },
+      {
+        id: 2,
+        title: "Drinking water distribution begins in drought-hit wards",
+        category: "infrastructure",
+        tag: "water",
+        date: "2025-09-12",
+        source: "MyRepublica",
+        excerpt: "Due to prolonged drought and dried tubewells, municipality and partners started supplying drinking water by tankers to affected wards, providing initial daily rations to residents.",
+        links: [{label:"Source", url:"https://www.myrepublica.nagariknetwork.com/"}]
+      },
+      {
+        id: 3,
+        title: "Mother and young son found dead in rented room; infant critical",
+        category: "crime",
+        tag: "death",
+        date: "2025-09-10",
+        source: "MyRepublica",
+        excerpt: "A woman and her young son were discovered dead in a rented room in Lahan-1 Matiarwa. A 7-month infant from the same household is in critical condition at hospital; investigation is ongoing.",
+        links: [{label:"Read report", url:"https://myrepublica.nagariknetwork.com/"}]
+      },
+      {
+        id: 4,
+        title: "Lahan municipality low capital spending reported",
+        category: "civic",
+        tag: "budget",
+        date: "2025-09-05",
+        source: "Rising Nepal",
+        excerpt: "Lahan has spent only 3.45% of its capital budget in the current fiscal year. Of the roughly Rs 1.23 billion budget, only about Rs 43.34 million has been used on capital projects, raising concerns around implementation.",
+        links: [{label:"Details", url:"https://risingnepaldaily.com/"}]
+      },
+      {
+        id: 5,
+        title: "Over 57,000 people in Siraha register for health insurance",
+        category: "health",
+        tag: "insurance",
+        date: "2025-08-28",
+        source: "Nepal News",
+        excerpt: "Siraha district (including Lahan) saw over 57,000 enrollments in the national health insurance scheme. Local branch teams ran registration drives and awareness campaigns.",
+        links: [{label:"More", url:"https://english.nepalnews.com/"}]
+      },
+      {
+        id: 6,
+        title: "Bomb explosion at Land Revenue office injures multiple people",
+        category: "crime",
+        tag: "explosion",
+        date: "2025-08-18",
+        source: "Ratopati",
+        excerpt: "An explosive device detonated at the Lahan land revenue (Malpot) office causing injuries to eight people including staffers. Authorities launched an investigation and increased security at municipal buildings.",
+        links: [{label:"News", url:"https://www.ratopati.com/"}]
+      },
+      {
+        id: 7,
+        title: "Municipality issues tender for river sand and gravel extraction",
+        category: "civic",
+        tag: "tender",
+        date: "2025-08-10",
+        source: "Lahan Municipality",
+        excerpt: "Lahan Municipality published an official tender notice for extraction and management of riverine sand/silt for the fiscal year, inviting contractors to bid under set environmental safeguards.",
+        links: [{label:"Municipal notice", url:"https://lahanmun.gov.np/"}]
+      },
+      {
+        id: 8,
+        title: "Modern waiting-shed constructed at Lahan-16 (public works)",
+        category: "infrastructure",
+        tag: "publicworks",
+        date: "2025-08-02",
+        source: "Lahan Today",
+        excerpt: "A modern public waiting-shed (प्रतीक्षालय) costing approximately रु. 25 Lakh was completed in Lahan-16 to improve commuter comfort and local amenities.",
+        links: [{label:"Local update", url:"https://lahantoday.com/"}]
+      },
+      {
+        id: 9,
+        title: "Allegation: rape of differently-abled minor reported in Lahan-5",
+        category: "crime",
+        tag: "safety",
+        date: "2025-07-29",
+        source: "Local media",
+        excerpt: "A serious allegation of sexual assault of a differently-abled minor was reported from Lahan-5. Citizens demanded prompt police action and protection for the victim; local human rights groups got involved.",
+        links: [{label:"Coverage", url:"https://lahantoday.com/"}]
+      },
+      {
+        id: 10,
+        title: "Local protests demand action against municipal officials",
+        category: "social",
+        tag: "protest",
+        date: "2025-07-20",
+        source: "Lahan Today / Siraha Times",
+        excerpt: "Residents staged protests calling for action against alleged mismanagement by municipal officials including Mayor Chaudhary. Demonstrations highlighted grievances around public spending and services.",
+        links: [{label:"Report", url:"https://sirahatimes.com/"}]
+      }
+    ];
+
+    // ---------- Config ----------
+    const PAGE_SIZE = 6;   // cards per page
+
+    // ---------- DOM refs ----------
+    const newsGrid = document.getElementById('newsGrid');
+    const searchInput = document.getElementById('searchInput');
+    const filterSelect = document.getElementById('filterSelect');
+    const sortSelect = document.getElementById('sortSelect');
+    const shownCount = document.getElementById('shownCount');
+    const pager = document.getElementById('pager');
+    const noResults = document.getElementById('noResults');
+    const refreshBtn = document.getElementById('refreshBtn');
+
+    // state
+    let currentPage = 1;
+    let filteredNews = [...NEWS];
+
+    // render helpers
+    function formatDate(iso) {
+      try { return new Date(iso).toLocaleDateString(); } catch(e) { return iso; }
+    }
+
+    function renderGrid(page=1) {
+      newsGrid.innerHTML = '';
+      const start = (page-1)*PAGE_SIZE;
+      const paged = filteredNews.slice(start, start + PAGE_SIZE);
+
+      if(paged.length === 0) {
+        noResults.style.display = 'block';
+      } else {
+        noResults.style.display = 'none';
+      }
+
+      paged.forEach(item => {
+        const col = document.createElement('div');
+        col.className = 'col-12 col-md-6 col-lg-4';
+        col.innerHTML = `
+          <article class="card news-card h-100">
+            <div class="card-body d-flex flex-column">
+              <div class="d-flex justify-content-between align-items-start mb-2">
+                <h5 class="card-title mb-0">${item.title}</h5>
+                <span class="tag bg-light text-dark">${item.tag}</span>
+              </div>
+              <p class="meta mb-1">${formatDate(item.date)} · <span class="source">${item.source}</span></p>
+              <p class="card-text truncate-3 mb-3">${item.excerpt}</p>
+              <div class="mt-auto d-flex gap-2">
+                <button class="btn btn-sm btn-outline-primary" onclick="openDetails(${item.id})">Read</button>
+                <a class="btn btn-sm btn-outline-secondary" href="${item.links[0]?.url || '#'}" target="_blank">Source</a>
+              </div>
+            </div>
+          </article>
+        `;
+        newsGrid.appendChild(col);
+      });
+
+      shownCount.textContent = filteredNews.length;
+      renderPager();
+    }
+
+    // pager
+    function renderPager(){
+      pager.innerHTML = '';
+      const pageCount = Math.ceil(filteredNews.length / PAGE_SIZE);
+      if(pageCount <= 1) return;
+
+      for(let i=1;i<=pageCount;i++){
+        const li = document.createElement('li');
+        li.className = 'page-item ' + (i===currentPage ? 'active' : '');
+        li.innerHTML = `<a class="page-link" href="#" onclick="gotoPage(${i});return false;">${i}</a>`;
+        pager.appendChild(li);
+      }
+    }
+
+    function gotoPage(i){
+      currentPage = i;
+      renderGrid(currentPage);
+      window.scrollTo({top:0,behavior:'smooth'});
+    }
+
+    // filtering / sorting
+    function applyFilters(){
+      const q = searchInput.value.trim().toLowerCase();
+      const cat = filterSelect.value;
+      const sort = sortSelect.value;
+
+      filteredNews = NEWS.filter(n => {
+        const matchesQ = (n.title + ' ' + n.excerpt + ' ' + n.tag + ' ' + n.source).toLowerCase().includes(q);
+        const matchesCat = (cat === 'all') ? true : n.category === cat;
+        return matchesQ && matchesCat;
+      });
+
+      if(sort === 'title-asc') filteredNews.sort((a,b)=> a.title.localeCompare(b.title));
+      if(sort === 'title-desc') filteredNews.sort((a,b)=> b.title.localeCompare(a.title));
+      if(sort === 'recent') filteredNews.sort((a,b)=> new Date(b.date) - new Date(a.date));
+
+      currentPage = 1;
+      renderGrid(currentPage);
+    }
+
+    // details modal
+    function openDetails(id){
+      const item = NEWS.find(n => n.id === id);
+      if(!item) return;
+      document.getElementById('modalTitle').textContent = item.title;
+      document.getElementById('modalDate').textContent = formatDate(item.date);
+      document.getElementById('modalCategory').textContent = item.category;
+      document.getElementById('modalSource').textContent = item.source;
+      document.getElementById('modalContent').textContent = item.excerpt;
+      const linksDiv = document.getElementById('modalLinks');
+      linksDiv.innerHTML = '';
+      if(Array.isArray(item.links)){
+        item.links.forEach(l => {
+          const a = document.createElement('a');
+          a.href = l.url; a.target = '_blank'; a.className = 'd-block';
+          a.textContent = l.label || l.url;
+          linksDiv.appendChild(a);
+        });
+      }
+      const modal = new bootstrap.Modal(document.getElementById('newsModal'));
+      modal.show();
+    }
+
+    // Expose openDetails to global scope so inline onclick works
+    window.openDetails = openDetails;
+    window.gotoPage = gotoPage;
+
+    // events
+    searchInput.addEventListener('input', ()=> { applyFilters(); });
+    filterSelect.addEventListener('change', applyFilters);
+    sortSelect.addEventListener('change', applyFilters);
+    refreshBtn.addEventListener('click', ()=> {
+      // In production: re-fetch from API, here we just re-run filters
+      applyFilters();
+      // simple visual feedback
+      refreshBtn.textContent = 'Refreshed';
+      setTimeout(()=> refreshBtn.textContent = 'Refresh', 900);
+    });
+
+    // initial
+    applyFilters();
+  </script>
+</body>
+</html>
