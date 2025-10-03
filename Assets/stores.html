@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lahan Stores</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: #f8f9fa;
+    }
+    .card {
+      border-radius: 15px;
+      transition: transform 0.2s;
+    }
+    .card:hover {
+      transform: translateY(-5px);
+    }
+    .search-bar {
+      max-width: 500px;
+      margin: 20px auto;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container py-4">
+    <h2 class="text-center mb-4">🛒 Stores in Lahan</h2>
+
+    <!-- Search Bar -->
+    <div class="input-group search-bar shadow-sm">
+      <input type="text" id="searchInput" class="form-control" placeholder="Search stores...">
+      <button class="btn btn-primary">Search</button>
+    </div>
+
+    <!-- Store Grid -->
+    <div class="row" id="storeList">
+
+      <!-- Store Card -->
+      <div class="col-md-4 mb-4 store-card" data-name="New Aalok Electronic">
+        <div class="card shadow-sm h-100">
+          <div class="card-body">
+            <h5 class="card-title">New Aalok Electronic</h5>
+            <p class="card-text">Electronics & Mobile / Home Appliances</p>
+            <p><strong>📍 Location:</strong> Mahendra Highway, Lahan</p>
+            <button class="btn btn-outline-primary btn-sm"
+              data-bs-toggle="modal" data-bs-target="#storeModal"
+              data-name="New Aalok Electronic"
+              data-type="Electronics & Mobile / Home Appliances"
+              data-location="Mahendra Highway, Lahan"
+              data-phone="+977 9819777901">View Details</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-4 mb-4 store-card" data-name="Sweta Pharmacy">
+        <div class="card shadow-sm h-100">
+          <div class="card-body">
+            <h5 class="card-title">Sweta Pharmacy</h5>
+            <p class="card-text">Medical / Pharmacy Store</p>
+            <p><strong>📍 Location:</strong> Hospital Chowk, Lahan</p>
+            <button class="btn btn-outline-primary btn-sm"
+              data-bs-toggle="modal" data-bs-target="#storeModal"
+              data-name="Sweta Pharmacy"
+              data-type="Medical / Pharmacy Store"
+              data-location="Hospital Chowk, Lahan"
+              data-phone="033-562067">View Details</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-4 mb-4 store-card" data-name="Nirajan Kirana Pasal">
+        <div class="card shadow-sm h-100">
+          <div class="card-body">
+            <h5 class="card-title">Nirajan Kirana Pasal</h5>
+            <p class="card-text">Grocery / Kirana Store</p>
+            <p><strong>📍 Location:</strong> Campus Road, Lahan-10</p>
+            <button class="btn btn-outline-primary btn-sm"
+              data-bs-toggle="modal" data-bs-target="#storeModal"
+              data-name="Nirajan Kirana Pasal"
+              data-type="Grocery / Kirana Store"
+              data-location="Campus Road, Lahan-10"
+              data-phone="+977 9814786795">View Details</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Add more stores following same structure -->
+
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal fade" id="storeModal" tabindex="-1" aria-labelledby="storeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="storeModalLabel">Store Details</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <h4 id="modalName"></h4>
+          <p><strong>🛍 Type:</strong> <span id="modalType"></span></p>
+          <p><strong>📍 Location:</strong> <span id="modalLocation"></span></p>
+          <p><strong>📞 Phone:</strong> <span id="modalPhone"></span></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Search filter
+    document.getElementById('searchInput').addEventListener('keyup', function () {
+      let filter = this.value.toLowerCase();
+      let cards = document.querySelectorAll('.store-card');
+      cards.forEach(card => {
+        let name = card.getAttribute('data-name').toLowerCase();
+        card.style.display = name.includes(filter) ? 'block' : 'none';
+      });
+    });
+
+    // Populate Modal
+    let storeModal = document.getElementById('storeModal');
+    storeModal.addEventListener('show.bs.modal', function (event) {
+      let button = event.relatedTarget;
+      document.getElementById('modalName').textContent = button.getAttribute('data-name');
+      document.getElementById('modalType').textContent = button.getAttribute('data-type');
+      document.getElementById('modalLocation').textContent = button.getAttribute('data-location');
+      document.getElementById('modalPhone').textContent = button.getAttribute('data-phone');
+    });
+  </script>
+
+</body>
+</html>
