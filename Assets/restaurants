@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lahan Restaurants</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background: #f8f9fa;
+    }
+    .card {
+      border-radius: 15px;
+      transition: transform 0.2s;
+    }
+    .card:hover {
+      transform: translateY(-5px);
+    }
+    .search-bar {
+      max-width: 500px;
+      margin: 20px auto;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container py-4">
+    <h2 class="text-center mb-4">🍽 Restaurants in Lahan</h2>
+
+    <!-- Search Bar -->
+    <div class="input-group search-bar shadow-sm">
+      <input type="text" id="searchInput" class="form-control" placeholder="Search restaurants...">
+      <button class="btn btn-primary">Search</button>
+    </div>
+
+    <!-- Restaurant Grid -->
+    <div class="row" id="restaurantList">
+      <!-- Example card -->
+      <div class="col-md-4 mb-4 restaurant-card" data-name="Orchid Cafe">
+        <div class="card shadow-sm h-100">
+          <div class="card-body">
+            <h5 class="card-title">Orchid Cafe</h5>
+            <p class="card-text">Pizza, burgers, momo, sekuwa, coffee, snacks.</p>
+            <p><strong>📍 Location:</strong> Golo Park, Lahan-1</p>
+            <button class="btn btn-outline-primary btn-sm" 
+              data-bs-toggle="modal" data-bs-target="#restaurantModal" 
+              data-name="Orchid Cafe" 
+              data-location="Golo Park, Lahan-1" 
+              data-phone="9851007775"
+              data-hours="9 AM - 9 PM"
+              data-desc="Family-friendly cafe with garden & WiFi.">View Details</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-4 mb-4 restaurant-card" data-name="Hotel Kancha">
+        <div class="card shadow-sm h-100">
+          <div class="card-body">
+            <h5 class="card-title">Hotel Kancha</h5>
+            <p class="card-text">Nepalese food & lodging restaurant.</p>
+            <p><strong>📍 Location:</strong> Lahan-1</p>
+            <button class="btn btn-outline-primary btn-sm" 
+              data-bs-toggle="modal" data-bs-target="#restaurantModal" 
+              data-name="Hotel Kancha" 
+              data-location="Lahan-1" 
+              data-phone="033-561140"
+              data-hours="8 AM - 9 PM"
+              data-desc="Popular local family-style restaurant.">View Details</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-4 mb-4 restaurant-card" data-name="Swad Desh Restaurant">
+        <div class="card shadow-sm h-100">
+          <div class="card-body">
+            <h5 class="card-title">Swad Desh Restaurant (Thakali)</h5>
+            <p class="card-text">Thakali food, biryani, momos.</p>
+            <p><strong>📍 Location:</strong> Lahan-1</p>
+            <button class="btn btn-outline-primary btn-sm" 
+              data-bs-toggle="modal" data-bs-target="#restaurantModal" 
+              data-name="Swad Desh Restaurant" 
+              data-location="Lahan-1" 
+              data-phone="033-564991"
+              data-hours="6 AM - 12 Midnight"
+              data-desc="Thakali khana set and fast food options.">View Details</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Add more restaurants in same format -->
+    </div>
+  </div>
+
+  <!-- Modal for Details -->
+  <div class="modal fade" id="restaurantModal" tabindex="-1" aria-labelledby="restaurantModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="restaurantModalLabel">Restaurant Details</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <h4 id="modalName"></h4>
+          <p><strong>📍 Location:</strong> <span id="modalLocation"></span></p>
+          <p><strong>📞 Phone:</strong> <span id="modalPhone"></span></p>
+          <p><strong>🕒 Hours:</strong> <span id="modalHours"></span></p>
+          <p id="modalDesc"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Search functionality
+    document.getElementById('searchInput').addEventListener('keyup', function () {
+      let filter = this.value.toLowerCase();
+      let cards = document.querySelectorAll('.restaurant-card');
+      cards.forEach(card => {
+        let name = card.getAttribute('data-name').toLowerCase();
+        card.style.display = name.includes(filter) ? 'block' : 'none';
+      });
+    });
+
+    // Modal population
+    let restaurantModal = document.getElementById('restaurantModal');
+    restaurantModal.addEventListener('show.bs.modal', function (event) {
+      let button = event.relatedTarget;
+      document.getElementById('modalName').textContent = button.getAttribute('data-name');
+      document.getElementById('modalLocation').textContent = button.getAttribute('data-location');
+      document.getElementById('modalPhone').textContent = button.getAttribute('data-phone');
+      document.getElementById('modalHours').textContent = button.getAttribute('data-hours');
+      document.getElementById('modalDesc').textContent = button.getAttribute('data-desc');
+    });
+  </script>
+</body>
+</html>
