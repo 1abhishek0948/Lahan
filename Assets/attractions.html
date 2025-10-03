@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lahan Attractions</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    :root{--glass-bg: rgba(255,255,255,0.08);--card-bg: rgba(255,255,255,0.03)}
+    body{background: linear-gradient(180deg,#0f172a 0%, #071027 100%);color:#fff;min-height:100vh}
+    .hero{padding:3rem 1rem;text-align:center}
+    .glass{backdrop-filter:blur(6px);background:var(--glass-bg);border:1px solid rgba(255,255,255,0.06);box-shadow:0 8px 30px rgba(2,6,23,0.6)}
+    .attraction-card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.04)}
+    .card-img-top{height:180px;object-fit:cover}
+    .search-input{max-width:480px;margin:0 auto}
+    footer{padding:2rem 1rem;text-align:center;color:#8b9abf}
+    @media (min-width:1200px){.card-img-top{height:200px}}
+  </style>
+</head>
+<body>
+  <header class="hero text-center text-white mb-4">
+    <div class="container">
+      <div class="p-4 glass rounded-3">
+        <h1 class="display-6 mb-2">Top 10 Attractions in Lahan</h1>
+        <p class="mb-3">Temples, parks, rivers and local spots — curated list with quick links and details.</p>
+        <div class="input-group search-input mb-2">
+          <input id="search" type="search" class="form-control form-control-lg" placeholder="Search attractions (e.g. Rajdevi, park, wetland)" aria-label="Search">
+          <button id="clear" class="btn btn-outline-light">Clear</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container mb-5">
+    <div id="grid" class="row g-4">
+      <!-- Cards injected by JS -->
+    </div>
+  </main>
+
+  <footer>
+    <small>Made for Lahan Community Portal • Data: local attractions (best-effort)</small>
+  </footer>
+
+  <!-- Modal for details -->
+  <div class="modal fade" id="detailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content bg-dark text-white">
+        <div class="modal-header border-0">
+          <h5 class="modal-title" id="modalTitle"></h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <img id="modalImg" src="" alt="" class="img-fluid rounded mb-3">
+          <p id="modalDesc"></p>
+          <p><strong>Location:</strong> <span id="modalLoc"></span></p>
+          <div id="modalActions"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Data for 10 attractions in/near Lahan
+    const attractions = [
+      {
+        id:1, name:'Rajdevi Temple', type:'Temple', short:'Major Hindu pilgrimage site near Lahan.',
+        desc:'Rajdevi Temple is a revered Hindu temple located a short drive from Lahan and attracts many devotees during festivals like Dashain.',
+        img:'https://images.unsplash.com/photo-1601758123927-7c0b1bf3b6a9?q=80&w=1400&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder', loc:'Lahan - Rajdevi area'
+      },
+      {id:2, name:'Rajdevi Panchawati Temple', type:'Temple', short:'Local temple and picnic spot.',
+        desc:'A popular temple inside Lahan-15, surrounded by green spaces used by families for short outings and ceremonies.',
+        img:'https://images.unsplash.com/photo-1533729786446-1d10e4b2b6d9?q=80&w=1400&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder', loc:'Lahan-15'
+      },
+      {id:3, name:'Salahesh Fulbari', type:'Garden', short:'Historical garden and cultural site.',
+        desc:'Salahesh Fulbari features landscaped gardens and is known for local festivities and seasonal flowers.',
+        img:'https://images.unsplash.com/photo-1503264116251-35a269479413?q=80&w=1400&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder', loc:'Near Lahan'
+      },
+      {id:4, name:'Hattidah Wetland', type:'Wetland / Park', short:'Ponds, birdlife and picnic areas.',
+        desc:'Hattidah is a developing wetland and tourist area with ponds and small walking paths—great for birdwatching and family picnics.',
+        img:'https://images.unsplash.com/photo-1501785888041-af3ef285b470?q=80&w=1400&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder', loc:'Lahan Municipality-15'
+      },
+      {id:5, name:'Vatika Fun Park', type:'Amusement Park', short:'Local leisure and play area for children.',
+        desc:'Vatika Fun Park provides play equipment and open lawns for events and weekend family outings.',
+        img:'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?q=80&w=1400&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder', loc:'Central Lahan'
+      },
+      {id:6, name:'Jhanda / Lahan Park', type:'City Park', short:'City park good for strolls and relaxation.',
+        desc:'Known locally as Jhanda Park, this green space in the town center is a popular place for morning walks and small gatherings.',
+        img:'https://images.unsplash.com/photo-1504198266283-4b1f5b1b4f6a?q=80&w=1400&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder', loc:'Central Lahan'
+      },
+      {id:7, name:'Haati Dah (Haati Pond)', type:'Natural Spot', short:'Tranquil pond area ideal for picnics.',
+        desc:'Haati Dah is a quiet natural spot popular with locals for picnics and short excursions into nature.',
+        img:'https://images.unsplash.com/photo-1502082553048-f009c37129b9?q=80&w=1400&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder', loc:'Dhodhana area'
+      },
+      {id:8, name:'Balan River', type:'River / Scenic', short:'Riverside area with scenic views.',
+        desc:'The Balan River area offers scenic riverside views and is often visited during temple festivals and religious processions.',
+        img:'https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=1400&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder', loc:'Near Rajdevi'
+      },
+      {id:9, name:'Khuttikhola', type:'River / Valley', short:'A small valley and river area for nature lovers.',
+        desc:'Khuttikhola is a river-valley setting close to Lahan that offers peaceful scenery and a chance to escape the bustle.',
+        img:'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?q=80&w=1400&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder', loc:'Outskirts of Lahan'
+      },
+      {id:10, name:'Lahan Bazaar', type:'Market / Cultural', short:'Vibrant local market and social hub.',
+        desc:'Lahan Bazaar is the busy marketplace where residents shop, eat, and socialize — a great place to experience local life.',
+        img:'https://images.unsplash.com/photo-1485965120184-e220f721d03e?q=80&w=1400&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder', loc:'Central Lahan'
+      }
+    ];
+
+    const grid = document.getElementById('grid');
+    const search = document.getElementById('search');
+    const clear = document.getElementById('clear');
+
+    function cardHTML(a){
+      return `
+      <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
+        <div class="card attraction-card h-100 text-white">
+          <img src="${a.img}" class="card-img-top" alt="${a.name}">
+          <div class="card-body d-flex flex-column">
+            <h5 class="card-title">${a.name}</h5>
+            <p class="card-text small text-muted mb-2">${a.type} • ${a.short}</p>
+            <div class="mt-auto d-flex gap-2">
+              <button class="btn btn-sm btn-outline-light flex-grow-1" onclick="openDetail(${a.id})">View</button>
+              <a class="btn btn-sm btn-light" target="_blank" href="https://www.google.com/maps/search/${encodeURIComponent(a.name + ' ' + a.loc)}">Map</a>
+            </div>
+          </div>
+        </div>
+      </div>`;
+    }
+
+    function render(list){
+      grid.innerHTML = list.map(cardHTML).join('');
+    }
+
+    function openDetail(id){
+      const a = attractions.find(x=>x.id===id);
+      if(!a) return;
+      document.getElementById('modalTitle').textContent = a.name;
+      document.getElementById('modalImg').src = a.img;
+      document.getElementById('modalDesc').textContent = a.desc;
+      document.getElementById('modalLoc').textContent = a.loc;
+      document.getElementById('modalActions').innerHTML = `
+        <a class="btn btn-outline-light me-2" target="_blank" href="https://www.google.com/maps/search/${encodeURIComponent(a.name + ' ' + a.loc)}">Open in Maps</a>
+        <a class="btn btn-light" href="mailto:info@lahan.gov.np?subject=Info%20about%20${encodeURIComponent(a.name)}">Contact</a>
+      `;
+      const modal = new bootstrap.Modal(document.getElementById('detailModal'));
+      modal.show();
+    }
+
+    // Initial render
+    render(attractions);
+
+    // Search/filter
+    search.addEventListener('input',()=>{
+      const q = search.value.trim().toLowerCase();
+      if(!q){ render(attractions); return; }
+      const filtered = attractions.filter(a=> (a.name + ' ' + a.type + ' ' + a.short + ' ' + a.loc).toLowerCase().includes(q));
+      render(filtered);
+    });
+
+    clear.addEventListener('click',()=>{ search.value=''; render(attractions); search.focus(); });
+
+  </script>
+</body>
+</html>
